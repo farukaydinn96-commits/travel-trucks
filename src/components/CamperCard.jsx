@@ -1,58 +1,106 @@
-import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { toggleFavorite } from "../redux/campersSlice";
 
-const CamperCard = ({ camper }) => {
+export default function CamperCard({ camper }) {
+  const dispatch = useDispatch();
+  const favorites = useSelector((state) => state.campers.favorites);
+  const isFavorite = favorites.includes(camper.id);
+
   return (
-    <div className="camper-card">
-      {/* Karavan Görseli (Eğer API'den gelen görsel array ise ilkini alıyoruz) */}
+    <div
+      className="card"
+      style={{ display: "flex", gap: "24px", marginBottom: "32px" }}
+    >
       <img
-        src={
-          camper.gallery && camper.gallery.length > 0
-            ? camper.gallery[0].thumb
-            : "https://via.placeholder.com/300x200"
-        }
+        src={camper.gallery[0].thumb}
         alt={camper.name}
-        className="camper-img"
+        style={{
+          width: "290px",
+          height: "310px",
+          objectFit: "cover",
+          borderRadius: "10px",
+        }}
       />
 
-      <div className="camper-details">
-        <div className="camper-header">
-          <h2>{camper.name}</h2>
-          <p className="camper-price">€{camper.price.toFixed(2)}</p>
+      <div style={{ flex: 1 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "8px",
+          }}
+        >
+          <h3 style={{ fontSize: "24px", margin: 0 }}>{camper.name}</h3>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "24px", fontWeight: "600" }}>
+              €{camper.price.toFixed(2)}
+            </span>
+            <button
+              onClick={() => dispatch(toggleFavorite(camper.id))}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "24px",
+                color: isFavorite ? "var(--primary-color)" : "var(--text-main)",
+                padding: 0,
+              }}
+            >
+              {isFavorite ? "♥" : "♡"}
+            </button>
+          </div>
         </div>
 
-        <div className="camper-rating-location">
-          <span>
-            ⭐ {camper.rating} ({camper.reviews ? camper.reviews.length : 0}{" "}
-            Reviews)
+        <p style={{ marginBottom: "24px" }}>
+          <span style={{ textDecoration: "underline" }}>
+            ★ {camper.rating} ({camper.reviews.length} Reviews)
           </span>
-          <span>📍 {camper.location}</span>
-        </div>
-
-        <p className="camper-description">
-          {camper.description && camper.description.substring(0, 60)}...
+          <span style={{ margin: "0 10px" }}>|</span>
+          <span>{camper.location}</span>
         </p>
 
-        <div className="camper-features">
-          {/* Projedeki standart özellikler (örnek olarak gösterilmiştir) */}
-          {camper.adults > 0 && (
-            <span className="feature-badge">👥 {camper.adults} adults</span>
-          )}
+        <p
+          style={{
+            color: "var(--text-light)",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "525px",
+            marginBottom: "24px",
+          }}
+        >
+          {camper.description}
+        </p>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            flexWrap: "wrap",
+            marginBottom: "24px",
+          }}
+        >
           {camper.transmission && (
-            <span className="feature-badge">⚙️ {camper.transmission}</span>
+            <span className="badge">{camper.transmission}</span>
           )}
-          {camper.engine && (
-            <span className="feature-badge">⛽ {camper.engine}</span>
-          )}
+          {camper.engine && <span className="badge">{camper.engine}</span>}
+          {camper.AC && <span className="badge">AC</span>}
+          {camper.kitchen && <span className="badge">Kitchen</span>}
         </div>
 
-        {/* 404 HATASINI ÇÖZEN KISIM: a etiketi veya button yerine Link kullanıyoruz */}
-        <Link to={`/catalog/${camper.id}`} className="show-more-btn">
-          Show more
+        {/* Yeni sekmede açılma (görev gereksinimi) ve orijinal buton tasarımı */}
+        <Link
+          to={`/catalog/${camper.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <button type="button" className="primary">
+            Show More
+          </button>
         </Link>
       </div>
     </div>
   );
-};
-
-export default CamperCard;
+}
